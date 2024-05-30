@@ -11,12 +11,14 @@ import FormErrorMessage from "./FormErrorMessage";
 import * as Yup from "yup";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { useUser } from "../context/UserContext";
 
 export default function NoteForm({ isCreate }) {
   const [oldData, setOldData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [previewImg, setPreviewImg] = useState("");
   const navigate = useNavigate();
+  const { token } = useUser();
   const fileRef = useRef();
 
   const { id } = useParams();
@@ -50,8 +52,6 @@ export default function NoteForm({ isCreate }) {
     imgUrl: isCreate ? "" : oldData?.imgUrl ?? "",
   };
 
-  console.log(initialValues);
-
   function handelImageSubmit(e, setFieldValue) {
     const fileImg = e.target.files[0];
     if (fileImg) {
@@ -78,7 +78,9 @@ export default function NoteForm({ isCreate }) {
       const response = await fetch(URL, {
         method,
         body: formData,
-        headers: {},
+        headers: {
+          Authorization: `Bearer ${token.token}`,
+        },
       });
 
       const data = await response.json();
@@ -134,13 +136,12 @@ export default function NoteForm({ isCreate }) {
       .min(10, "Content must be at least 10.")
       .max(500, "Conent should less than 500 characters")
       .required("Content is required!"),
-    imgUrl: Yup.mixed()
-      .nullable()
-      // .test(
-      //   "FILE_FORMAT",
-      //   "File type is not support.",
-      //   (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-      // ),
+    imgUrl: Yup.mixed().nullable(),
+    // .test(
+    //   "FILE_FORMAT",
+    //   "File type is not support.",
+    //   (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+    // ),
   });
 
   return (

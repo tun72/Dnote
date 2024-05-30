@@ -1,5 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
+const authMiddleware = require("../middlewares/authMiddleware")
 
 const router = express.Router();
 const noteController = require("../controllers/noteController");
@@ -9,6 +10,7 @@ router.route("/all").get(noteController.getNotes);
 router
   .route("/create")
   .post(
+    authMiddleware.isAuth,
     [
       body("title")
         .trim()

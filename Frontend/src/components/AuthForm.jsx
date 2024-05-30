@@ -5,8 +5,11 @@ import * as Yup from "yup";
 import { Link, json, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import { toast } from "react-toastify";
+import { useUser } from "../context/UserContext";
 
 export default function AuthForm({ isLogin }) {
+  const { setToken } = useUser();
+
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const initialValues = {
@@ -56,7 +59,9 @@ export default function AuthForm({ isLogin }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      if (response.status === 201) {
+      if (response.status === 200) {
+        console.log(data);
+        setToken({ token: data.token, userId: data.userId });
         toast.success(data.message, {
           position: "top-right",
           autoClose: 5000,

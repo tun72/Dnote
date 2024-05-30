@@ -2,7 +2,16 @@ const User = require("../models/userModel");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
 dotenv.config();
+
+const createToken = (user) => {
+  return jwt.sign(
+    { email: user.email, userId: user._id },
+    process.env.SECRECT,
+    { expiresIn: "1h" }
+  );
+};
 exports.Login = async (req, res, next) => {
   const { email, password } = req.body;
   const errors = validationResult(req);
@@ -14,6 +23,7 @@ exports.Login = async (req, res, next) => {
     });
   }
 
+
   try {
     const user = await User.findOne({ email });
 
@@ -23,10 +33,12 @@ exports.Login = async (req, res, next) => {
 
     if (!isPassword) throw new Error("Authentication Failed!");
 
-    console.log("Success");
-    return res.status(201).json({
+    const token = createToken(user);
+
+    return res.status(200).json({
       message: "Successfully Login!",
-      user,
+      userId: user._id,
+      token,
     });
 
     // const user = await User.create({ email, username, password: hashPassword });
@@ -40,7 +52,7 @@ exports.Register = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    res.status(422).json({
+    return res.status(422).json({
       message: "Authentication Failed!",
       errors: errors.array(),
     });
@@ -50,9 +62,11 @@ exports.Register = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ email, username, password: hashPassword });
 
-    res.status(201).json({
+    const token = createToken(user);
+    return res.status(200).json({
       message: "Successfully Register!",
-      user,
+      userId: user._id,
+      token,
     });
   } catch (err) {
     next(err);
