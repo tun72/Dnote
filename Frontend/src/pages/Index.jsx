@@ -18,6 +18,7 @@ export default function Index() {
   const page = +searchParams.get("page") || 1;
 
   const fetchData = async (page = "") => {
+    
     try {
       setIsLoading(true);
       const response = await fetch(

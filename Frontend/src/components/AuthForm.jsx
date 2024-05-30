@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useUser } from "../context/UserContext";
 
 export default function AuthForm({ isLogin }) {
-  const { setToken } = useUser();
+  const { handelSetToken } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ export default function AuthForm({ isLogin }) {
 
       if (response.status === 200) {
         console.log(data);
-        setToken({ token: data.token, userId: data.userId });
+        handelSetToken({ token: data.token, userId: data.userId });
         toast.success(data.message, {
           position: "top-right",
           autoClose: 5000,

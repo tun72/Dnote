@@ -23,7 +23,6 @@ exports.Login = async (req, res, next) => {
     });
   }
 
-
   try {
     const user = await User.findOne({ email });
 
@@ -71,4 +70,8 @@ exports.Register = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+exports.checkStatus = (req, res, next) => {
+  res.status(200).json("ok");
 };

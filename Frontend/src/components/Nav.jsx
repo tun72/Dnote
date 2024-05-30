@@ -1,9 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
+
 export default function Nav() {
-  const { token } = useUser();
+  const { token, handelSetToken } = useUser();
+
+  function handelLogout() {
+    handelSetToken(null);
+  }
   return (
     <nav className="bg-teal-50 flex items-center justify-between py-4 px-10">
       <Link to="/">
@@ -25,6 +29,9 @@ export default function Nav() {
           <>
             <li>
               <Link to="/create">Share Note</Link>
+            </li>
+            <li>
+              <span className="cursor-pointer" onClick={handelLogout}>Logout</span>
             </li>
           </>
         )}

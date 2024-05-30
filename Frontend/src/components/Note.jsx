@@ -3,15 +3,24 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
-import { Link } from "react-router-dom";
+import { Link, redirect, useSearchParams } from "react-router-dom";
 import formatISO9075 from "date-fns/formatISO9075";
 import { toast } from "react-toastify";
 
 export default function Note({ note, fetchNote }) {
   const { _id, title, content, createdAt } = note;
 
+  const [searchParams] = useSearchParams();
+  const page = +searchParams.get("page") || 1;
+
   const handleDeleteNote = async () => {
     try {
+      const localToken = JSON.parse(localStorage.getItem("token"));
+
+      if (!localToken) {
+        return redirect("/");
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_API}/notes/${_id}/delete`,
         {
@@ -19,11 +28,10 @@ export default function Note({ note, fetchNote }) {
         }
       );
 
-      console.log(response);
       if (!response.ok) throw new Error("Deleting Failed!");
 
       if (response.status === 204) {
-        await fetchNote();
+        await fetchNote(page);
         toast.success("Successfully Deleted", {
           position: "top-right",
           autoClose: 5000,
