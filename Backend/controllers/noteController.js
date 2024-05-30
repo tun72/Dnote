@@ -123,11 +123,12 @@ exports.deleteNote = async (req, res, next) => {
   try {
     const note = await Note.findByIdAndDelete(noteId);
 
-    console.log(note);
     if (!note)
       return res.status(404).json({
         message: "Error No Note found!",
       });
+
+    fileDelete(note.imgUrl);
 
     return res.status(204).json({
       message: "Note Successfully updated ✅",
