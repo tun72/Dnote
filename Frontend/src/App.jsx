@@ -7,6 +7,7 @@ import Detail, { loader as noteLoader } from "./pages/Detail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { isLogin as isLoginLoader } from "./utils/isLogin";
+import ProtectRoute from "./components/ProtectRoute";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -21,12 +22,20 @@ export default function App() {
         },
         {
           path: "/create",
-          element: <Create />,
+          element: (
+            <ProtectRoute>
+              <Create />
+            </ProtectRoute>
+          ),
           loader: isLoginLoader,
         },
         {
           path: "/edit/:id",
-          element: <Edit />,
+          element: (
+            <ProtectRoute>
+              <Edit />
+            </ProtectRoute>
+          ),
           loader: isLoginLoader,
         },
         {

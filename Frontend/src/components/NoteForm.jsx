@@ -1,12 +1,6 @@
-import { ArrowLeftIcon } from "@heroicons/react/16/solid";
+import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import { Field, Form, Formik } from "formik";
-import {
-  Link,
-  json,
-  useFetcher,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import FormErrorMessage from "./FormErrorMessage";
 import * as Yup from "yup";
 import { useEffect, useRef, useState } from "react";
@@ -19,9 +13,11 @@ export default function NoteForm({ isCreate }) {
   const [previewImg, setPreviewImg] = useState("");
   const navigate = useNavigate();
   const { token } = useUser();
-  const fileRef = useRef();
-
+  const userId = token?.userId ?? "";
   const { id } = useParams();
+
+  const fileRef = useRef();
+  
   useEffect(() => {
     if (isCreate) return;
     const fetchData = async () => {
@@ -30,26 +26,26 @@ export default function NoteForm({ isCreate }) {
 
         if (!response.ok) throw new Error("something wrong");
         const data = await response.json();
-        console.log(data);
-        setOldData(data.note);
 
-        const previewImg = data.note.imgUrl
-          ? import.meta.env.VITE_API + "/" + data.note.imgUrl
-          : "";
-
-        console.log(previewImg);
-        setPreviewImg(previewImg);
+        if (response.status === 200) {
+          if (data.note.userId._id.toString() !== userId) return navigate("/");
+          setOldData(data.note);
+          const previewImg = data.note.imgUrl
+            ? import.meta.env.VITE_API + "/" + data.note.imgUrl
+            : "";
+          setPreviewImg(previewImg);
+        }
       } catch (err) {
         console.log(err);
       }
     };
     fetchData();
-  }, [id, isCreate]);
+  }, [id, isCreate, userId, navigate]);
 
   const initialValues = {
     title: isCreate ? "" : oldData?.title ?? "",
     content: isCreate ? "" : oldData?.content ?? "",
-    imgUrl: isCreate ? "" : oldData?.imgUrl ?? "",
+    imgUrl: isCreate ? null : "",
   };
 
   function handelImageSubmit(e, setFieldValue) {
@@ -115,6 +111,13 @@ export default function NoteForm({ isCreate }) {
     }
   }
 
+  function handelClear(setFieldValue) {
+    setPreviewImg(null);
+    setFieldValue("imgUrl", null);
+
+    fileRef.current.value = "";
+  }
+
   // custom
   // function validate(values) {
   //   const errors = {};
@@ -136,12 +139,13 @@ export default function NoteForm({ isCreate }) {
       .min(10, "Content must be at least 10.")
       .max(500, "Conent should less than 500 characters")
       .required("Content is required!"),
-    imgUrl: Yup.mixed().nullable(),
-    // .test(
-    //   "FILE_FORMAT",
-    //   "File type is not support.",
-    //   (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    // ),
+    imgUrl: Yup.mixed()
+      .nullable()
+      .test(
+        "FILE_FORMAT",
+        "File type is not support.",
+        (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      ),
   });
 
   return (
@@ -202,6 +206,17 @@ export default function NoteForm({ isCreate }) {
               className="mt-4 relative border-2 border-teal-600 border-dashed rounded-lg p-6"
               id="dropzone"
             >
+              {values.imgUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handelClear(setFieldValue);
+                  }}
+                  className="absolute flex items-center top-2 right-2 text-teal-600 font-bold"
+                >
+                  <XMarkIcon width={20} /> clear
+                </button>
+              )}
               <div className="text-center">
                 <img
                   className="mx-auto h-12 w-12"
@@ -218,6 +233,7 @@ export default function NoteForm({ isCreate }) {
                       id="imgUrl"
                       name="imgUrl"
                       type="file"
+                      ref={fileRef}
                       className="sr-only"
                       onChange={(e) => {
                         handelImageSubmit(e, setFieldValue);

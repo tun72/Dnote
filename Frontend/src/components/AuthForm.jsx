@@ -45,7 +45,7 @@ export default function AuthForm({ isLogin }) {
 
     try {
       setIsLoading(true);
-      console.log(URL);
+
       const response = await fetch(URL, {
         method,
         body: JSON.stringify(values),
@@ -54,14 +54,16 @@ export default function AuthForm({ isLogin }) {
         },
       });
 
-      console.log(response);
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
       if (response.status === 200) {
         console.log(data);
-        handelSetToken({ token: data.token, userId: data.userId });
+        handelSetToken({
+          token: data.token,
+          userId: data.userId,
+          userEmail: data.userEmail,
+        });
         toast.success(data.message, {
           position: "top-right",
           autoClose: 5000,

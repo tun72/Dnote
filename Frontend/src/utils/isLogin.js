@@ -17,8 +17,9 @@ export function isValidJSON(string) {
 export const isLogin = async () => {
   try {
     const token = JSON.parse(localStorage.getItem("token"));
+
     if (!token) {
-      return redirect("/");
+      throw new Error("Auth Error");
     }
     const response = await fetch(`${import.meta.env.VITE_API}/auth/status`, {
       headers: {
@@ -26,14 +27,16 @@ export const isLogin = async () => {
       },
     });
     console.log(response);
-    if (!response.ok) {
-      return redirect("/");
-    }
     if (response.status === 401) {
-      return redirect("/");
+      throw new Error("Auth Error");
     }
-    return [];
+
+    if (!response.ok) {
+      throw new Error("Auth Error");
+    }
+
+    return null;
   } catch (err) {
-    return redirect("/");
+    return err.message;
   }
 };

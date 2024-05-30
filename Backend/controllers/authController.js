@@ -34,9 +34,11 @@ exports.Login = async (req, res, next) => {
 
     const token = createToken(user);
 
+
     return res.status(200).json({
       message: "Successfully Login!",
       userId: user._id,
+      userEmail: user.email,
       token,
     });
 
@@ -65,6 +67,7 @@ exports.Register = async (req, res, next) => {
     return res.status(200).json({
       message: "Successfully Register!",
       userId: user._id,
+      userEmail: user.email,
       token,
     });
   } catch (err) {

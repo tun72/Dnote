@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const authMiddleware = require("../middlewares/authMiddleware")
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 const noteController = require("../controllers/noteController");
@@ -32,6 +32,8 @@ router
 router
   .route("/:noteId/update")
   .put(
+    authMiddleware.isAuth,
+    authMiddleware.isOwner,
     [
       body("title")
         .isLength({ min: 3 })
@@ -47,7 +49,13 @@ router
     noteController.patchNote
   );
 
-router.route("/:noteId/delete").delete(noteController.deleteNote);
+router
+  .route("/:noteId/delete")
+  .delete(
+    authMiddleware.isAuth,
+    authMiddleware.isOwner,
+    noteController.deleteNote
+  );
 
 // get single notes
 router.route("/:noteId").get(noteController.getSingleNote);

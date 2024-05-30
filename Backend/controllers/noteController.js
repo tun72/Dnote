@@ -13,7 +13,6 @@ exports.getNotes = async (req, res, next) => {
   // 2 - 1 * 6 = 6
   // 3 - 1 * 6 = 12
 
-
   try {
     const notes = await Note.find()
       .skip((currentPage - 1) * LIMIT)
@@ -33,7 +32,8 @@ exports.getNotes = async (req, res, next) => {
 // get single note
 exports.getSingleNote = async (req, res, next) => {
   const { noteId } = req.params;
-  const note = await Note.findById(noteId);
+  const note = await Note.findById(noteId).populate("userId", "username email");
+
   return res.status(200).json({
     message: "Success",
     note,
@@ -65,6 +65,7 @@ exports.postNote = async (req, res, next) => {
       title,
       content,
       imgUrl: image?.path ?? "",
+      userId: req.userId,
     });
 
     return res.status(201).json({
